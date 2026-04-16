@@ -2508,7 +2508,7 @@ def display_class_results(request, session_id, term_id, class_id):
         num_subjects = results.count()
         average_score = total_score / num_subjects if num_subjects > 0 else 0
 
-        # Grading logic (Keep your existing code)
+        # Grading logic
         if 76 <= average_score <= 100:
             overall_grade = "A+"
         elif 70 <= average_score < 76:
@@ -2538,7 +2538,7 @@ def display_class_results(request, session_id, term_id, class_id):
             student=student
         ).first()
 
-        # Comments (Keep your existing gender-based logic)
+        # Comments
         if average_score >= 65:
             eng, ar_m, ar_f = "AN EXCELLENT PERFORMANCE, KEEP IT UP.", "فاز بتقدير ممتاز ويرجى له التفوق في الفترات القادمة", "فازت بتقدير ممتاز ويرجى لها التفوق في الفترات القادمة"
         elif average_score >= 50:
@@ -2558,12 +2558,12 @@ def display_class_results(request, session_id, term_id, class_id):
             'overall_grade': overall_grade,
             'behavioral_assessment': behavioral_assessment,
             'comments': comments,
-            'class_position': rank_map.get(student.id) # <--- ADDED THIS
+            'class_position': rank_map.get(student.id)
         })
 
-    # ... remaining image processing logic ...
-    header_image_base64 = image_to_base64(school_config.header_image) if school_config.header_image else None
-    signature_image_base64 = image_to_base64(school_config.signature_image) if school_config.signature_image else None
+    # Get image URLs (simple and clean)
+    header_image_url = school_config.header_image.url if school_config and school_config.header_image else None
+    signature_image_url = school_config.signature_image.url if school_config and school_config.signature_image else None
 
     context = {
         'session': session,
@@ -2572,12 +2572,11 @@ def display_class_results(request, session_id, term_id, class_id):
         'results_data': results_data,
         'school_config': school_config,
         'total_students': total_students,
-        'header_image_base64': header_image_base64,
-        'signature_image_base64': signature_image_base64,
+        'header_image_url': header_image_url,
+        'signature_image_url': signature_image_url,
     }
 
     return render(request, 'src/display_class_results.html', context)
-
 
 @login_required(login_url='login')
 def download_all_results_pdf(request, session_id, term_id, class_id):
@@ -2622,7 +2621,7 @@ def download_all_results_pdf(request, session_id, term_id, class_id):
             num_subjects = results.count()
             average_score = total_score / num_subjects if num_subjects > 0 else 0
 
-            # منطق الدرجات والتعليقات (نفس الكود الخاص بك)
+            # منطق الدرجات والتعليقات
             if 76 <= average_score <= 100: overall_grade = "A+"
             elif 70 <= average_score < 76: overall_grade = "A"
             elif 65 <= average_score < 70: overall_grade = "A-"
@@ -2645,8 +2644,9 @@ def download_all_results_pdf(request, session_id, term_id, class_id):
 
             comments = f"{eng}\n{ar_m if student.gender == 'Male' else ar_f}"
 
-            header_image_url = f"file://{school_config.header_image.path}" if school_config and school_config.header_image else None
-            signature_image_url = f"file://{school_config.signature_image.path}" if school_config and school_config.signature_image else None
+            # Use normal URLs instead of file://
+            header_image_url = school_config.header_image.url if school_config and school_config.header_image else None
+            signature_image_url = school_config.signature_image.url if school_config and school_config.signature_image else None
 
             html_string = render_to_string(
                 'src/display_class_results.html',
@@ -2658,7 +2658,7 @@ def download_all_results_pdf(request, session_id, term_id, class_id):
                         'average_score': average_score,
                         'overall_grade': overall_grade,
                         'comments': comments,
-                        'class_position': rank_map.get(student.id), # الترتيب المضاف
+                        'class_position': rank_map.get(student.id),
                     }],
                     'school_config': school_config,
                     'session': session,
@@ -2689,7 +2689,7 @@ def download_single_result_pdf(request, student_id, session_id, term_id, class_i
     school_class = get_object_or_404(SchoolClass, pk=class_id)
     school_config = SchoolConfig.objects.last()
 
-    # --- 1. حساب الترتيب لجميع الطلاب في الفصل لمعرفة ترتيب هذا الطالب ---
+    # --- حساب الترتيب لجميع الطلاب في الفصل لمعرفة ترتيب هذا الطالب ---
     students_in_class = Student.objects.filter(enrolled_class=school_class)
     all_student_averages = []
     for s in students_in_class:
@@ -2719,9 +2719,16 @@ def download_single_result_pdf(request, student_id, session_id, term_id, class_i
     num_subjects = results.count()
     average_score = total_score / num_subjects if num_subjects > 0 else 0
 
-    # (استكمال منطق التقدير والتعليقات كما في السابق...)
+    # منطق التقدير
     if 76 <= average_score <= 100: overall_grade = "A+"
-    # ... بقية منطق الـ IF الخاصة بك ...
+    elif 70 <= average_score < 76: overall_grade = "A"
+    elif 65 <= average_score < 70: overall_grade = "A-"
+    elif 60 <= average_score < 65: overall_grade = "B+"
+    elif 55 <= average_score < 60: overall_grade = "B"
+    elif 50 <= average_score < 55: overall_grade = "B-"
+    elif 46 <= average_score < 50: overall_grade = "C+"
+    elif 43 <= average_score < 46: overall_grade = "C"
+    elif 39 <= average_score < 43: overall_grade = "C-"
     else: overall_grade = "F"
 
     # تعيين التعليقات
@@ -2736,8 +2743,9 @@ def download_single_result_pdf(request, student_id, session_id, term_id, class_i
 
     comments = f"{eng}\n{ar_m if student.gender == 'Male' else ar_f}"
 
-    header_image_url = f"file://{school_config.header_image.path}" if school_config and school_config.header_image else None
-    signature_image_url = f"file://{school_config.signature_image.path}" if school_config and school_config.signature_image else None
+    # Use normal URLs instead of file://
+    header_image_url = school_config.header_image.url if school_config and school_config.header_image else None
+    signature_image_url = school_config.signature_image.url if school_config and school_config.signature_image else None
 
     html_string = render_to_string(
         'src/display_class_results.html',
@@ -2749,7 +2757,7 @@ def download_single_result_pdf(request, student_id, session_id, term_id, class_i
                 'average_score': average_score,
                 'overall_grade': overall_grade,
                 'comments': comments,
-                'class_position': target_position, # الترتيب المضاف
+                'class_position': target_position,
             }],
             'school_config': school_config,
             'session': session,
@@ -2758,7 +2766,8 @@ def download_single_result_pdf(request, student_id, session_id, term_id, class_i
             'total_students': students_in_class.count(),
             'header_image_url': header_image_url,
             'signature_image_url': signature_image_url,
-        }
+        },
+        request=request
     )
 
     pdf = HTML(string=html_string, base_url=request.build_absolute_uri('/')).write_pdf()

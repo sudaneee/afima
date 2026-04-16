@@ -89,14 +89,10 @@
                 <thead>
                     <tr>
                         <th colspan="14" class="text-center p-0">
-                            {% if school_config.header_image %}
-                            
-                                {% if header_image_url %}
-                                <div class="header text-center">
-                                    <img src="{{ header_image_url }}" alt="School Header">
-                                </div>
-                                {% endif %}
-                                                            
+                            {% if school_config.header_image and header_image_url %}
+                            <div class="header text-center">
+                                <img src="{{ header_image_url }}" alt="School Header">
+                            </div>
                             {% endif %}
                         </th>
                     </tr>
@@ -259,10 +255,9 @@
 
                     <tr>
                         <td colspan="14" class="text-center py-2">
-                            {% if school_config.signature_image %}
-                                {% if signature_image_url %}
-                                <img src="{{ signature_image_url }}" style="height: 60px;"><br>
-                                {% endif %}
+                            <!-- And for signature -->
+                            {% if school_config.signature_image and signature_image_url %}
+                            <img src="{{ signature_image_url }}" style="height: 60px;"><br>
                             {% endif %}
 
                             <hr style="width: 60%; margin: auto;">

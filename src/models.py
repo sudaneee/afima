@@ -155,29 +155,21 @@ class Result(models.Model):
 
     @property
     def grade(self):
-        if 76 <= self.total_marks <= 100:
-            return 'A+'
-        elif 70 <= self.total_marks <= 75:
+        if 70 <= self.total_marks <= 100:
             return 'A'
-        elif 65 <= self.total_marks <= 69:
-            return 'A-'
-        elif 60 <= self.total_marks <= 64:
-            return 'B+'
-        elif 55 <= self.total_marks <= 59:
+        elif 60 <= self.total_marks <= 69:
             return 'B'
-        elif 50 <= self.total_marks <= 54:
-            return 'B-'
-        elif 46 <= self.total_marks <= 49:
-            return 'C+'
-        elif 43 <= self.total_marks <= 45:
+        elif 50 <= self.total_marks <= 59:
             return 'C'
-        elif 39 <= self.total_marks <= 42:
-            return 'C-'
-        elif 0 <= self.total_marks <= 38:
+        elif 45 <= self.total_marks <= 49:
+            return 'D'
+        elif 40 <= self.total_marks <= 44:
+            return 'E'
+        elif 0 <= self.total_marks <= 39:
             return 'F'
         else:
             return 'Invalid Marks'
-
+            
     def calculate_position(self):
         """
         Calculate the rank of the current result (`self`) among all results for the same subject,

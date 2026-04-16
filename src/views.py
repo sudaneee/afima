@@ -2720,16 +2720,18 @@ def download_single_result_pdf(request, student_id, session_id, term_id, class_i
     average_score = total_score / num_subjects if num_subjects > 0 else 0
 
     # منطق التقدير
-    if 76 <= average_score <= 100: overall_grade = "A+"
-    elif 70 <= average_score < 76: overall_grade = "A"
-    elif 65 <= average_score < 70: overall_grade = "A-"
-    elif 60 <= average_score < 65: overall_grade = "B+"
-    elif 55 <= average_score < 60: overall_grade = "B"
-    elif 50 <= average_score < 55: overall_grade = "B-"
-    elif 46 <= average_score < 50: overall_grade = "C+"
-    elif 43 <= average_score < 46: overall_grade = "C"
-    elif 39 <= average_score < 43: overall_grade = "C-"
-    else: overall_grade = "F"
+    if 70 <= average_score <= 100:
+        overall_grade = "A"
+    elif 60 <= average_score < 70:
+        overall_grade = "B"
+    elif 50 <= average_score < 60:
+        overall_grade = "C"
+    elif 45 <= average_score < 50:
+        overall_grade = "D"
+    elif 40 <= average_score < 45:
+        overall_grade = "E"
+    else:
+        overall_grade = "F"
 
     # تعيين التعليقات
     if average_score >= 65:
@@ -3014,17 +3016,18 @@ def display_single_result(request, session_id, term_id, student_id, token_code):
     average_score = total_score / num_subjects if num_subjects > 0 else 0
 
     # Grading logic
-    if 76 <= average_score <= 100: overall_grade = "A+"
-    elif 70 <= average_score < 76: overall_grade = "A"
-    elif 65 <= average_score < 70: overall_grade = "A-"
-    elif 60 <= average_score < 65: overall_grade = "B+"
-    elif 55 <= average_score < 60: overall_grade = "B"
-    elif 50 <= average_score < 55: overall_grade = "B-"
-    elif 46 <= average_score < 50: overall_grade = "C+"
-    elif 43 <= average_score < 46: overall_grade = "C"
-    elif 39 <= average_score < 43: overall_grade = "C-"
-    else: overall_grade = "F"
-
+    if 70 <= average_score <= 100:
+        overall_grade = "A"
+    elif 60 <= average_score < 70:
+        overall_grade = "B"
+    elif 50 <= average_score < 60:
+        overall_grade = "C"
+    elif 45 <= average_score < 50:
+        overall_grade = "D"
+    elif 40 <= average_score < 45:
+        overall_grade = "E"
+    else:
+        overall_grade = "F"
     # Behavioral Assessment
     behavioral_assessment = StudentBehaviouralAssessment.objects.filter(
         session=session,

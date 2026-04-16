@@ -50,162 +50,163 @@
 </head>
 <body>
     <div class="container mt-4">
-        <!-- Display each student's result -->
+        
+        <div class="no-print mb-3 text-end">
+            <button onclick="window.print()" class="btn btn-secondary btn-sm">
+                <i class="fas fa-print"></i> Print Result
+            </button>
+            <a href="{% url 'download_single_result_pdf' student.id session.id term.id school_class.id %}" 
+               class="btn btn-success btn-sm">
+                Download PDF
+            </a>
+        </div>
+
         {% for data in results_data %}
-        <div class="result-section">
-
-            <!-- Combined Information and Results Table with Sections -->
-            <div class="table-responsive mb-4">
-                <div style="overflow-x: auto;">
-                    <table class="table table-bordered table-striped">
-
-                        <!-- Student Information Section Title -->
-                        <thead>
-                            <tr>
-                                <th colspan="14" class="text-center">
-                                    <!-- Header Image from SchoolConfig for Each Student -->
-                                    {% if school_config.header_image %}
+        <div class="result-section shadow-sm p-4 mb-5 bg-white rounded">
+            
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan="14" class="text-center p-0 border-0">
+                                {% if header_image_base64 %}
                                     <div class="header text-center">
-                                        <img src="{{ school_config.header_image.url }}" alt="School Header">
+                                        <img src="data:image/png;base64,{{ header_image_base64 }}" alt="School Header" style="max-width: 100%; height: auto;">
                                     </div>
-                                    {% endif %}
-                                </th>
-                            </tr>
-                        </thead>
+                                {% elif school_config.header_image %}
+                                    <div class="header text-center">
+                                        <img src="{{ school_config.header_image.url }}" alt="School Header" style="max-width: 100%; height: auto;">
+                                    </div>
+                                {% endif %}
+                            </th>
+                        </tr>
+                        <tr>
+                            <th colspan="14" class="text-center bg-light py-3">
+                                <h2 class="mb-0">REPORT SHEET</h2>
+                            </th>
+                        </tr>
+                    </thead>
 
-                        <!-- Report Card Title -->
-                        <thead>
-                            <tr>
-                                <th colspan="14" class="text-center"><h1>REPORT SHEET</h1></th>
-                            </tr>
-                        </thead>
+                    <tbody>
+                        <tr class="bg-light">
+                            <th colspan="14" class="text-center text-uppercase small">Student Information</th>
+                        </tr>
+                        <tr>
+                            <th width="15%">Student Name</th>
+                            <td colspan="8"><strong>{{ data.student.first_name }} {{ data.student.last_name }}</strong></td>
+                            <th width="15%">Admission No</th>
+                            <td colspan="4">{{ data.student.admission_number|default:"N/A" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Class</th>
+                            <td colspan="8">{{ school_class.name }} {{ school_class.arm }}</td>
+                            <th>Term</th>
+                            <td colspan="4">{{ term.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Session</th>
+                            <td colspan="3">{{ session.name }}</td>
+                            <th>No. in Class</th>
+                            <td colspan="4">{{ total_students }}</td>
+                            <th>Position</th>
+                            <td colspan="4"><strong>{{ data.class_position }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Closing Date</th>
+                            <td colspan="8">{{ term.end_date|date:"d/M/Y" }}</td>
+                            <th>Resumption</th>
+                            <td colspan="4">{{ term.next_term_resupmtion|date:"d/M/Y" }}</td>
+                        </tr>
+                    </tbody>
 
-                        <!-- Student Information Section -->
-                        <thead>
-                            <tr>
-                                <th colspan="14" class="text-center">STUDENT INFORMATION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>Student Name</th>
-                                <td colspan="9">{{ data.student.first_name }} {{ data.student.last_name }} [{{data.student.admission_number}}]</td>
-    
-                                
-                                <th>Term</th>
-                                <td colspan="3">{{ term.name }}</td>
-                            </tr>
-                            <tr>
-                                <th>Current Class</th>
-                                <td colspan="9">{{ data.student.enrolled_class }}</td>
-                                <th>Session</th>
-                                <td colspan="3">{{ session }}</td>
-           
-                            </tr>
-                            <tr>
+                    <thead>
+                        <tr class="bg-light text-center">
+                            <th colspan="14" class="text-uppercase small">Academic Report</th>
+                        </tr>
+                        <tr class="text-center bg-white">
+                            <th colspan="4">Subject</th>
+                            <th>CA1</th>
+                            <th>CA2</th>
+                            <th>Exam</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                            <th colspan="4">Subject Position</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in data.results %}
+                        <tr class="text-center">
+                            <td colspan="4" class="text-start">{{ result.subject.name }}</td>
+                            <td>{{ result.ca1_marks }}</td>
+                            <td>{{ result.ca2_marks }}</td>
+                            <td>{{ result.exam_marks }}</td>
+                            <td><strong>{{ result.total_marks }}</strong></td>
+                            <td>{{ result.grade }}</td>
+                            <td colspan="4">{{ result.position }}</td>
+                        </tr>
+                        {% endfor %}
 
-                               
-                                
-                                <th>Closing Date</th>
-                                <td colspan="9">{{ term.end_date }}</td>
-                                <th>Resumption Date</th>
-                                <td colspan="3">{{ term.next_term_resupmtion }}</td>
-                            </tr>
+                        <tr class="bg-light">
+                            <td colspan="4"><strong>Total Score: {{ data.total_score }}</strong></td>
+                            <td colspan="4"><strong>Average: {{ data.average_score|floatformat:2 }}%</strong></td>
+                            <td colspan="6" class="text-center"><strong>Overall Grade: {{ data.overall_grade }}</strong></td>
+                        </tr>
+                    </tbody>
 
-                        </tbody>
+                    {% if data.behavioral_assessment %}
+                    <thead>
+                        <tr class="bg-light text-center">
+                            <th colspan="14" class="text-uppercase small">Behavioral Assessment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="small text-center">
+                            <td colspan="2">Conduct: <strong>{{ data.behavioral_assessment.conduct }}</strong></td>
+                            <td colspan="2">Punctuality: <strong>{{ data.behavioral_assessment.punctuality }}</strong></td>
+                            <td colspan="2">Dedication: <strong>{{ data.behavioral_assessment.dedication }}</strong></td>
+                            <td colspan="2">Participation: <strong>{{ data.behavioral_assessment.participation }}</strong></td>
+                            <td colspan="2">Neatness: <strong>{{ data.behavioral_assessment.neatness }}</strong></td>
+                            <td colspan="4">Creativity: <strong>{{ data.behavioral_assessment.creativity }}</strong></td>
+                        </tr>
+                    </tbody>
+                    {% endif %}
 
-                        <!-- Subject Results Section -->
-                        <thead>
-                            <tr>
-                                <th colspan="14" class="text-center">ACADEMIC REPORT</th>
-                            </tr>
-                        </thead>
-                        <thead>
-                            <tr>
-                                <th colspan="4">Subject</th>
-                                <th>CA1</th>
-                                <th>CA2</th>
-                                <th colspan="2">Homework</th>
-                                <th>Activity</th>
-                                <th>Exam</th>
-                                <th colspan="2">Total</th>
-                                <th>Grade</th>
-                                <th >Position</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in data.results %}
-                            <tr>
-                                <td colspan="4">{{ result.subject.name }}</td>
-                                <td>{{ result.ca1_marks }}</td>
-                                <td>{{ result.ca2_marks }}</td>
-                                <td colspan="2">{{ result.home_work_marks }}</td>
-                                <td>{{ result.activity_marks }}</td>
-                                <td>{{ result.exam_marks }}</td>
-                                <td colspan="2">{{ result.total_marks }}</td>
-                                <td>{{ result.grade }}</td>
-                                <td>{{ result.position }}</td>
-                            </tr>
-                            {% endfor %}
-                            <tr>
-                                <td colspan="4"><strong>Total Score</strong></td>
-                                <td>{{ data.total_score }}</td>
-                                <td colspan="3"><strong>Average Score</strong></td>
-                                <td colspan="2">{{ data.average_score|floatformat:2 }}%</td>
-                                <td colspan="3"><strong>Overall Grade</strong></td>
-                                <td colspan="">{{ data.overall_grade }}</td>
-                            </tr>
-                        </tbody>
-
-                        <!-- GRADING SYSTEM -->
-                        <thead>
-                            
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th colspan="16" class="text-center">
-                                    <img src="{{ grading_system.image.url }}" alt="Grading System" style="width: 100%; height: auto;">
-                                </th>
-                            
-                            </tr>
-         
-                            
-                        </tbody>
-
-                        <!-- General Comments -->
-                        <thead>
-                            <tr>
-                                <th colspan="16" class="text-center">General Comments</th>
-                                
-                            </tr>
-                            <tr>
-                                
-                                <td colspan="16" class="text-center" style="font-weight: bold; font-size: 18px;">{{ data.comments|linebreaks }}</td>
-                            </tr>
-                        </thead>
-
-                        <!-- Signature Section -->
-                        <thead>
-                            <tr>
-                                <th colspan="8" class="text-center">Head of School's Signature</th>
-                                <td colspan="8" class="text-center">
-                                    {% if school_config.signature_image %}
-                                    <img src="{{ school_config.signature_image.url }}" alt="Signature" style="width: 150px;">
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </thead>
-
-                    </table>
-                </div>
+                    <thead>
+                        <tr class="bg-light text-center">
+                            <th colspan="14" class="text-uppercase small">General Comments & Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="14" class="text-center py-4" style="font-size: 1.1rem; line-height: 1.6;">
+                                {{ data.comments|linebreaksbr }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="14" class="text-center py-3">
+                                {% if signature_image_base64 %}
+                                    <img src="data:image/png;base64,{{ signature_image_base64 }}" style="height: 70px;"><br>
+                                {% elif school_config.signature_image %}
+                                    <img src="{{ school_config.signature_image.url }}" style="height: 70px;"><br>
+                                {% endif %}
+                                <div style="width: 250px; border-top: 2px solid #000; margin: 10px auto 0 auto;"></div>
+                                <span class="text-uppercase small font-weight-bold">Head of School's Signature</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .result-section { border: none !important; box-shadow: none !important; }
+            body { background-color: white !important; }
+        }
+    </style>
 </body>
-
 </html>

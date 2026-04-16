@@ -147,7 +147,9 @@
                     <!-- ADDED STUDENT COUNT -->
                     <tr>
                         <th>No. of Students</th>
-                        <td colspan="13">{{ total_students }}</td>
+                        <td colspan="6">{{ total_students }}</td>
+                        <th>Position</th>
+                        <td colspan="8">{{ data.class_position }}</td>
                     </tr>
                 </tbody>
 
@@ -161,12 +163,12 @@
                         <th colspan="4">Subject</th>
                         <th>CA1</th>
                         <th>CA2</th>
-                        <th colspan="2">H/W</th>
-                        <th>ACT</th>
+                        <!-- <th colspan="2">H/Woo</th>
+                        <th>ACT</th> -->
                         <th>Exam</th>
-                        <th colspan="2">Total</th>
+                        <th>Total</th>
                         <th>Grade</th>
-                        <th>Pos</th>
+                        <th colspan="4">Pos</th>
                     </tr>
                 </thead>
 
@@ -176,12 +178,12 @@
                         <td colspan="4" class="text-start">{{ result.subject.name }}</td>
                         <td>{{ result.ca1_marks }}</td>
                         <td>{{ result.ca2_marks }}</td>
-                        <td colspan="2">{{ result.home_work_marks }}</td>
-                        <td>{{ result.activity_marks }}</td>
+                        <!-- <td colspan="2">{{ result.home_work_marks }}</td>
+                        <td>{{ result.activity_marks }}</td> -->
                         <td>{{ result.exam_marks }}</td>
-                        <td colspan="2"><strong>{{ result.total_marks }}</strong></td>
+                        <td><strong>{{ result.total_marks }}</strong></td>
                         <td>{{ result.grade }}</td>
-                        <td>{{ result.subject_position }}</td>
+                        <td colspan="4">{{ result.subject_position }}</td>
                     </tr>
                     {% endfor %}
 
@@ -190,11 +192,11 @@
                             <strong>Total Score: {{ data.total_score }}</strong>
                         </td>
 
-                        <td colspan="5">
+                        <td colspan="4">
                             <strong>Average: {{ data.average_score|floatformat:2 }}%</strong>
                         </td>
 
-                        <td colspan="5" class="text-center">
+                        <td colspan="6" class="text-center">
                             <strong>Overall Grade: {{ data.overall_grade }}</strong>
                         </td>
                     </tr>

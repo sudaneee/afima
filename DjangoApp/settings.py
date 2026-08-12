@@ -28,7 +28,11 @@ SECRET_KEY = 'django-insecure-o6_a-(vu9p6hwbd1^!ro)lvfk47hi*d38q+kr1nl0x+dy4_08(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-CSRF_TRUSTED_ORIGINS = ['http://69.10.44.126:8030']
+CSRF_TRUSTED_ORIGINS = [
+    'http://69.10.44.126:8030',
+    'https://afima.ng',
+    'https://www.afima.ng',
+]
 ALLOWED_HOSTS = ['*']
 
 

@@ -1,0 +1,104 @@
+{% extends 'website/base.html' %}
+{% load static %}
+{% block content %}
+<div class="page-wrapper">
+
+    <!-- Main Header-->
+    {% include 'website/header.html' %}
+
+    <!--Page Title-->
+    <section class="page-title" style="background-image:url('{{about_header_bg.image.url}}');">
+        <div class="auto-container">
+            <h2>Online Admission</h2>
+        </div>
+    </section>
+
+    <!--Breadcrumb-->
+    <div class="breadcrumb-outer">
+        <div class="auto-container">
+            <ul class="bread-crumb text-center">
+                <li><a href="{% url 'home' %}">Home</a> <span class="fa fa-angle-right"></span></li>
+                <li>Online Admission</li>
+            </ul>
+        </div>
+    </div>
+    <!--End Page Title-->
+
+    <style>
+        .admission-section { padding: 70px 0; }
+        .admission-card {
+            max-width: 640px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+        .admission-card h3 { margin-bottom: 10px; }
+        .admission-card .sub { color: #777; margin-bottom: 30px; }
+        .admission-card label { font-weight: 600; margin-bottom: 8px; display: block; }
+        .admission-card input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .admission-card button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            background: #14206b;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .admission-card .messages { margin-bottom: 20px; }
+        .admission-card .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 10px; }
+        .admission-card .alert-error { background: #fdecea; color: #b3261e; border: 1px solid #f5c6c3; }
+        .admission-guide { max-width: 640px; margin: 0 auto 25px; }
+        .admission-guide ul { padding-left: 20px; color: #555; }
+    </style>
+
+    <section class="admission-section">
+        <div class="auto-container">
+            <div class="admission-guide">
+                <h4>How to Apply</h4>
+                <ul>
+                    <li>Obtain your unique 10-digit admission token from the school.</li>
+                    <li>Enter the token below to unlock the online application form.</li>
+                    <li>Complete and submit the form — each token can only be used once.</li>
+                    <li>Print or save your acknowledgment slip after submission.</li>
+                </ul>
+            </div>
+
+            <div class="admission-card">
+                <h3>Enter Your Admission Token</h3>
+                <div class="sub">Enter the 10-digit token code provided by the school to begin your application.</div>
+
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-error">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <label for="token_code">Admission Token</label>
+                    <input type="text" id="token_code" name="token_code" maxlength="10" placeholder="e.g. 4728190365" required autofocus>
+                    <button type="submit">Continue to Application Form</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    {% include 'website/footer.html' %}
+</div>
+{% endblock content %}

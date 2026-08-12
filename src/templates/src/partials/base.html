@@ -95,6 +95,16 @@
                   </ul>
                 </li>
 
+                <!-- Online Admission Section -->
+                <li class="dropdown">
+                  <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="user-plus"></i><span>Online Admission</span></a>
+                  <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{% url 'admission_token_list' %}">Admission Tokens</a></li>
+                    <li><a class="nav-link" href="{% url 'generate_admission_tokens' %}">Generate Tokens</a></li>
+                    <li><a class="nav-link" href="{% url 'application_list' %}">Applications</a></li>
+                  </ul>
+                </li>
+
                 <!-- Settings Section -->
                 <li class="dropdown">
                   <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="settings"></i><span>Settings</span></a>

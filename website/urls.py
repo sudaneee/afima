@@ -14,4 +14,9 @@ urlpatterns = [
     path('news/<pk>', views.news_single, name='news-single'),
     path('contact', views.contact, name="website-contact"),
     path('journals', views.journals, name="journals"),
+
+    # Online Admission Application
+    path('admission/', views.admission_token_entry, name='admission_token_entry'),
+    path('admission/apply/', views.admission_apply, name='admission_apply'),
+    path('admission/success/<int:pk>/', views.admission_success, name='admission_success'),
 ]

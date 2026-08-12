@@ -5296,3 +5296,243 @@ def export_compliance_to_excel(results, session, term, class_name, request):
 #         "payments": payments,
 #         "data2": school
 #     })
+
+
+# ---------------------------------------------------------------------------
+# Online Admission Portal - Token & Application Management (Staff side)
+# ---------------------------------------------------------------------------
+
+import csv
+
+
+@login_required(login_url='login')
+def admission_token_list(request):
+    batches = TokenBatch.objects.all().order_by('-created_at')
+    tokens = AdmissionToken.objects.select_related('batch').all()
+
+    status = request.GET.get('status')
+    if status == 'used':
+        tokens = tokens.filter(is_used=True)
+    elif status == 'unused':
+        tokens = tokens.filter(is_used=False, is_active=True)
+    elif status == 'deactivated':
+        tokens = tokens.filter(is_active=False)
+
+    batch_id = request.GET.get('batch')
+    if batch_id:
+        tokens = tokens.filter(batch_id=batch_id)
+
+    search = request.GET.get('q')
+    if search:
+        tokens = tokens.filter(token_code__icontains=search.strip())
+
+    context = {
+        'batches': batches,
+        'tokens': tokens[:500],
+        'total_tokens': AdmissionToken.objects.count(),
+        'used_tokens': AdmissionToken.objects.filter(is_used=True).count(),
+        'unused_tokens': AdmissionToken.objects.filter(is_used=False, is_active=True).count(),
+        'selected_status': status or '',
+        'selected_batch': batch_id or '',
+        'search': search or '',
+    }
+    return render(request, 'src/admission_token_list.html', context)
+
+
+@login_required(login_url='login')
+def generate_admission_tokens(request):
+    if request.method == 'POST':
+        label = request.POST.get('label', '').strip()
+        try:
+            quantity = int(request.POST.get('quantity', '0'))
+        except ValueError:
+            quantity = 0
+
+        if quantity <= 0 or quantity > 1000:
+            messages.error(request, 'Please enter a quantity between 1 and 1000.')
+            return redirect('generate_admission_tokens')
+
+        batch = TokenBatch.objects.create(
+            label=label or None,
+            quantity=quantity,
+            generated_by=request.user,
+        )
+
+        tokens = [
+            AdmissionToken(token_code=generate_admission_token_code(), batch=batch)
+            for _ in range(quantity)
+        ]
+        AdmissionToken.objects.bulk_create(tokens)
+
+        messages.success(request, f'{quantity} admission token(s) generated successfully.')
+        return redirect('print_admission_tokens', batch_id=batch.id)
+
+    return render(request, 'src/generate_admission_tokens.html')
+
+
+@login_required(login_url='login')
+def print_admission_tokens(request, batch_id):
+    batch = get_object_or_404(TokenBatch, id=batch_id)
+    tokens = batch.tokens.all().order_by('id')
+    school_config = SchoolConfig.objects.last()
+    context = {
+        'batch': batch,
+        'tokens': tokens,
+        'school_config': school_config,
+    }
+    return render(request, 'src/print_admission_tokens.html', context)
+
+
+@login_required(login_url='login')
+def export_admission_tokens_csv(request, batch_id):
+    batch = get_object_or_404(TokenBatch, id=batch_id)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="admission_tokens_batch_{batch.id}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Token Code', 'Batch', 'Status', 'Generated On'])
+    for token in batch.tokens.all().order_by('id'):
+        status = 'Used' if token.is_used else ('Deactivated' if not token.is_active else 'Unused')
+        writer.writerow([token.token_code, batch.label or batch.id, status, token.created_at.strftime('%Y-%m-%d %H:%M')])
+
+    return response
+
+
+@login_required(login_url='login')
+def deactivate_admission_token(request, token_id):
+    token = get_object_or_404(AdmissionToken, id=token_id)
+    if token.is_used:
+        messages.error(request, 'Cannot deactivate a token that has already been used.')
+    else:
+        token.is_active = False
+        token.save()
+        messages.success(request, f'Token {token.token_code} deactivated.')
+    return redirect('admission_token_list')
+
+
+@login_required(login_url='login')
+def reactivate_admission_token(request, token_id):
+    token = get_object_or_404(AdmissionToken, id=token_id)
+    token.is_active = True
+    token.save()
+    messages.success(request, f'Token {token.token_code} reactivated.')
+    return redirect('admission_token_list')
+
+
+@login_required(login_url='login')
+def application_list(request):
+    applications = AdmissionApplication.objects.select_related('class_applying_for', 'session', 'token').all()
+
+    status = request.GET.get('status')
+    if status:
+        applications = applications.filter(status=status)
+
+    class_id = request.GET.get('class')
+    if class_id:
+        applications = applications.filter(class_applying_for_id=class_id)
+
+    session_id = request.GET.get('session')
+    if session_id:
+        applications = applications.filter(session_id=session_id)
+
+    search = request.GET.get('q')
+    if search:
+        applications = applications.filter(
+            Q(full_name__icontains=search) |
+            Q(application_number__icontains=search) |
+            Q(phone_number__icontains=search)
+        )
+
+    context = {
+        'applications': applications,
+        'school_classes': SchoolClass.objects.all(),
+        'sessions': Session.objects.all(),
+        'status_choices': AdmissionApplication.STATUS_CHOICES,
+        'selected_status': status or '',
+        'selected_class': class_id or '',
+        'selected_session': session_id or '',
+        'search': search or '',
+    }
+    return render(request, 'src/application_list.html', context)
+
+
+@login_required(login_url='login')
+def application_detail(request, pk):
+    application = get_object_or_404(AdmissionApplication, id=pk)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        application_number = request.POST.get('application_number', '').strip()
+        notes = request.POST.get('review_notes', '').strip()
+
+        if application_number and application_number != application.application_number:
+            application.application_number = application_number
+
+        if new_status in dict(AdmissionApplication.STATUS_CHOICES):
+            application.status = new_status
+
+        application.review_notes = notes
+        application.reviewed_by = request.user
+        application.reviewed_at = timezone.now()
+        application.save()
+
+        messages.success(request, 'Application updated successfully.')
+        return redirect('application_detail', pk=application.id)
+
+    context = {'application': application}
+    return render(request, 'src/application_detail.html', context)
+
+
+@login_required(login_url='login')
+def convert_application_to_student(request, pk):
+    application = get_object_or_404(AdmissionApplication, id=pk)
+
+    if application.linked_student:
+        messages.info(request, 'This application has already been converted to a student record.')
+        return redirect('application_detail', pk=application.id)
+
+    name_parts = application.full_name.strip().split(' ', 1)
+    first_name = name_parts[0]
+    last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+    guardian = Guardian.objects.create(
+        first_name='Parent/Guardian of',
+        last_name=application.full_name,
+        phone_number=application.guardian_phone_number,
+        relationship='Parent/Guardian',
+    )
+
+    student = Student.objects.create(
+        first_name=first_name,
+        last_name=last_name,
+        date_of_birth=application.date_of_birth,
+        gender=application.sex,
+        address=application.contact_address,
+        phone_number=application.phone_number,
+        enrolled_class=application.class_applying_for,
+        photo=application.passport_photograph,
+        status='active',
+        admission_status='admitted',
+        admitted_at=timezone.now(),
+    )
+    student.guardians.add(guardian)
+
+    student.admission_number = f"AF-{timezone.now().year}-{student.id}"
+    student.save()
+
+    application.linked_student = student
+    application.status = 'admitted'
+    application.reviewed_by = request.user
+    application.reviewed_at = timezone.now()
+    application.save()
+
+    messages.success(request, f'{application.full_name} has been admitted as a student ({student.admission_number}).')
+    return redirect('application_detail', pk=application.id)
+
+
+@login_required(login_url='login')
+def print_application(request, pk):
+    application = get_object_or_404(AdmissionApplication, id=pk)
+    school_config = SchoolConfig.objects.last()
+    context = {'application': application, 'school_config': school_config}
+    return render(request, 'src/print_application.html', context)

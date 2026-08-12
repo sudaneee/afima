@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admission Tokens - {{ batch.label|default:batch.id }}</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 20px;
+        color: #222;
+    }
+    .toolbar {
+        margin-bottom: 20px;
+    }
+    .toolbar button, .toolbar a {
+        padding: 8px 16px;
+        background: #2f56d9;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 8px;
+    }
+    h2 { margin-bottom: 2px; }
+    .subtitle { color: #666; margin-bottom: 20px; }
+    .token-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    .token-card {
+        border: 1px dashed #999;
+        border-radius: 6px;
+        padding: 14px;
+        text-align: center;
+    }
+    .token-card .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #666;
+        margin-bottom: 6px;
+    }
+    .token-card .code {
+        font-size: 22px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        font-family: 'Courier New', monospace;
+    }
+    .token-card .note {
+        font-size: 10px;
+        color: #888;
+        margin-top: 6px;
+    }
+    @media print {
+        .toolbar { display: none; }
+        body { margin: 0; }
+        .token-grid { grid-template-columns: repeat(3, 1fr); }
+        .token-card { break-inside: avoid; }
+    }
+</style>
+</head>
+<body>
+    <div class="toolbar">
+        <button onclick="window.print()">Print Tokens</button>
+        <a href="{% url 'admission_token_list' %}">Back to Tokens</a>
+        <a href="{% url 'export_admission_tokens_csv' batch.id %}">Export CSV</a>
+    </div>
+
+    <h2>Admission Application Tokens</h2>
+    <div class="subtitle">
+        Batch: {{ batch.label|default:batch.id }} &nbsp;|&nbsp;
+        Quantity: {{ batch.quantity }} &nbsp;|&nbsp;
+        Generated: {{ batch.created_at|date:"d M Y" }}
+    </div>
+
+    <div class="token-grid">
+        {% for token in tokens %}
+        <div class="token-card">
+            <div class="label">Admission Token</div>
+            <div class="code">{{ token.token_code }}</div>
+            <div class="note">Apply online with this token</div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{% extends "src/partials/base.html" %}
+{% block content %}
+<div class="main-content mt-1">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Generate Admission Tokens</h4>
+            <a href="{% url 'admission_token_list' %}" class="btn btn-outline-secondary">Back to Tokens</a>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">
+                Each token generated here is a unique 10-digit code that a prospective applicant will use
+                to unlock the online admission application form on the school website. Tokens are
+                single-use — once an application is submitted, the token can no longer be reused.
+            </p>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Batch Label (Optional)</label>
+                    <input type="text" name="label" class="form-control" placeholder="e.g. 2026/2027 Admission Batch 1">
+                </div>
+                <div class="form-group">
+                    <label>Number of Tokens to Generate</label>
+                    <input type="number" name="quantity" class="form-control" min="1" max="1000" required placeholder="e.g. 50">
+                    <small class="text-muted">Maximum 1000 tokens per batch.</small>
+                </div>
+                <div class="card-footer text-right px-0">
+                    <button type="submit" class="btn btn-primary">Generate Tokens</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,93 @@
+{% extends 'website/base.html' %}
+{% load static %}
+{% block content %}
+<div class="page-wrapper">
+
+    <!-- Main Header-->
+    {% include 'website/header.html' %}
+
+    <!--Page Title-->
+    <section class="page-title" style="background-image:url('{{about_header_bg.image.url}}');">
+        <div class="auto-container">
+            <h2>Application Submitted</h2>
+        </div>
+    </section>
+
+    <!--Breadcrumb-->
+    <div class="breadcrumb-outer">
+        <div class="auto-container">
+            <ul class="bread-crumb text-center">
+                <li><a href="{% url 'home' %}">Home</a> <span class="fa fa-angle-right"></span></li>
+                <li>Application Submitted</li>
+            </ul>
+        </div>
+    </div>
+    <!--End Page Title-->
+
+    <style>
+        .success-section { padding: 60px 0; }
+        .success-card {
+            max-width: 640px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            padding: 40px;
+            text-align: center;
+        }
+        .success-card .icon { font-size: 50px; color: #2e9e5b; margin-bottom: 10px; }
+        .success-card h3 { margin-bottom: 6px; }
+        .success-card .sub { color: #777; margin-bottom: 25px; }
+        .slip { border: 1px dashed #ccc; border-radius: 8px; padding: 20px; text-align: left; margin-bottom: 25px; }
+        .slip table { width: 100%; }
+        .slip table td { padding: 6px 0; font-size: 14px; }
+        .slip table td.label { color: #777; width: 45%; }
+        .success-card .actions button, .success-card .actions a {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            margin: 0 6px;
+            cursor: pointer;
+        }
+        .actions .btn-print { background: #14206b; color: #fff; }
+        .actions .btn-home { background: #eef1ff; color: #14206b; }
+        @media print {
+            header, .page-title, .breadcrumb-outer, footer, .actions { display: none !important; }
+        }
+    </style>
+
+    <section class="success-section">
+        <div class="auto-container">
+            <div class="success-card">
+                <div class="icon">&#10004;</div>
+                <h3>Application Submitted Successfully</h3>
+                <div class="sub">Thank you, {{ application.full_name }}. Your application has been received.</div>
+
+                <div class="slip">
+                    <table>
+                        <tr><td class="label">Application No.</td><td><strong>{{ application.application_number }}</strong></td></tr>
+                        <tr><td class="label">Full Name</td><td>{{ application.full_name }}</td></tr>
+                        <tr><td class="label">Class Applying For</td><td>{{ application.class_applying_for|default:"—" }}</td></tr>
+                        <tr><td class="label">Academic Session</td><td>{{ application.session|default:"—" }}</td></tr>
+                        <tr><td class="label">Phone Number</td><td>{{ application.phone_number }}</td></tr>
+                        <tr><td class="label">Date Submitted</td><td>{{ application.submitted_at|date:"d M Y, H:i" }}</td></tr>
+                    </table>
+                </div>
+
+                <p>Please keep your Application Number safe. The school will contact you using the phone number provided regarding the next steps.</p>
+
+                <div class="actions">
+                    <button class="btn-print" onclick="window.print()">Print Acknowledgment</button>
+                    <a class="btn-home" href="{% url 'home' %}">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'website/footer.html' %}
+</div>
+{% endblock content %}

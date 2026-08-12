@@ -1,0 +1,84 @@
+{% extends "src/partials/base.html" %}
+{% block content %}
+<div class="main-content mt-1">
+    <div class="card">
+        <div class="card-header">
+            <h4>Admission Applications</h4>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="form-inline mb-3">
+                <select name="status" class="form-control mr-2 mb-2">
+                    <option value="">All Statuses</option>
+                    {% for value, display in status_choices %}
+                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+                <select name="class" class="form-control mr-2 mb-2">
+                    <option value="">All Classes</option>
+                    {% for c in school_classes %}
+                    <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+                <select name="session" class="form-control mr-2 mb-2">
+                    <option value="">All Sessions</option>
+                    {% for s in sessions %}
+                    <option value="{{ s.id }}" {% if selected_session == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="q" value="{{ search }}" placeholder="Search name / application no." class="form-control mr-2 mb-2">
+                <button type="submit" class="btn btn-primary mb-2">Filter</button>
+                <a href="{% url 'application_list' %}" class="btn btn-outline-secondary mb-2 ml-2">Reset</a>
+            </form>
+
+            <table class="table table-striped" id="table-1">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Application No.</th>
+                        <th>Full Name</th>
+                        <th>Phone</th>
+                        <th>Class Applying For</th>
+                        <th>Session</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                    <tr>
+                        <td>
+                            {% if application.passport_photograph %}
+                            <img src="{{ application.passport_photograph.url }}" alt="Photo" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                            {% endif %}
+                        </td>
+                        <td>{{ application.application_number|default:"—" }}</td>
+                        <td>{{ application.full_name }}</td>
+                        <td>{{ application.phone_number }}</td>
+                        <td>{{ application.class_applying_for|default:"—" }}</td>
+                        <td>{{ application.session|default:"—" }}</td>
+                        <td>
+                            {% if application.status == 'admitted' %}
+                                <span class="badge badge-success">{{ application.get_status_display }}</span>
+                            {% elif application.status == 'rejected' %}
+                                <span class="badge badge-danger">{{ application.get_status_display }}</span>
+                            {% elif application.status == 'under_review' %}
+                                <span class="badge badge-info">{{ application.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge badge-warning">{{ application.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ application.submitted_at|date:"d M Y" }}</td>
+                        <td>
+                            <a href="{% url 'application_detail' application.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center">No applications submitted yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %}

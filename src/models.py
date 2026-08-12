@@ -553,6 +553,115 @@ class Token(models.Model):
         self.save()
 
 
+# ---------------------------------------------------------------------------
+# Online Admission Application
+# ---------------------------------------------------------------------------
+
+import random
+import string
+
+
+def generate_admission_token_code():
+    """Generate a random unique 10-digit numeric admission token code."""
+    while True:
+        code = ''.join(random.choices(string.digits, k=10))
+        if not AdmissionToken.objects.filter(token_code=code).exists():
+            return code
+
+
+class TokenBatch(models.Model):
+    """Groups a set of admission tokens generated together, for tracking/printing/distribution."""
+    label = models.CharField(max_length=100, blank=True, null=True)
+    quantity = models.PositiveIntegerField()
+    generated_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.label or f"Batch #{self.id} ({self.created_at:%Y-%m-%d})"
+
+    class Meta:
+        ordering = ('-created_at',)
+
+
+class AdmissionToken(models.Model):
+    """
+    A single-use 10-digit token printed and handed to a prospective student/applicant.
+    The applicant enters this token on the school website to unlock the online
+    admission application form.
+    """
+    token_code = models.CharField(max_length=10, unique=True)
+    batch = models.ForeignKey(TokenBatch, related_name='tokens', null=True, blank=True, on_delete=models.SET_NULL)
+    is_used = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.token_code
+
+    class Meta:
+        ordering = ('-created_at',)
+
+
+class AdmissionApplication(models.Model):
+    """Biodata submitted by a prospective student applying for admission using a token."""
+
+    SEX_CHOICES = [
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('under_review', 'Under Review'),
+        ('admitted', 'Admitted'),
+        ('rejected', 'Rejected'),
+    ]
+
+    token = models.OneToOneField(AdmissionToken, related_name='application', on_delete=models.CASCADE)
+
+    # Assigned by the school/official once the application is received (like an "Employee's No.")
+    application_number = models.CharField(max_length=30, unique=True, blank=True, null=True)
+
+    # Applicant Biodata
+    full_name = models.CharField(max_length=150)
+    phone_number = models.CharField(max_length=20)
+    date_of_birth = models.DateField()
+    sex = models.CharField(max_length=10, choices=SEX_CHOICES)
+    contact_address = models.TextField()
+    religion = models.CharField(max_length=50)
+    nationality = models.CharField(max_length=50, default='Nigerian')
+    state_of_origin = models.CharField(max_length=50)
+    lga = models.CharField(max_length=50, verbose_name="L.G.A.")
+    guardian_phone_number = models.CharField(max_length=20, verbose_name="Parent's/Guardian's Phone Number")
+    guardian_occupation = models.CharField(max_length=100, verbose_name="Parent's/Guardian's Occupation")
+    health_status = models.TextField(blank=True, null=True, help_text="Any known allergy/medical condition, or 'Good'")
+    qualifications_obtained = models.TextField(blank=True, null=True, help_text="Previous school(s) attended / certificates obtained")
+
+    # Admission-specific
+    class_applying_for = models.ForeignKey('SchoolClass', on_delete=models.SET_NULL, null=True, blank=True, related_name='admission_applications')
+    session = models.ForeignKey('Session', on_delete=models.SET_NULL, null=True, blank=True, related_name='admission_applications')
+    passport_photograph = models.ImageField(upload_to='applicants/photos/')
+
+    # Declaration by Applicant/Parent/Guardian
+    declaration_agreed = models.BooleanField(default=False)
+    declaration_full_name = models.CharField(max_length=150, help_text="Typed full name serves as signature")
+    declaration_date = models.DateField()
+
+    # Review workflow
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_notes = models.TextField(blank=True, null=True)
+    linked_student = models.ForeignKey('Student', null=True, blank=True, on_delete=models.SET_NULL, related_name='admission_application')
+
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} ({self.application_number or 'Unassigned'})"
+
+    class Meta:
+        ordering = ('-submitted_at',)
 
 
 # Tahfeez Result Model

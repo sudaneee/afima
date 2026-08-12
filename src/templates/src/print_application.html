@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admission Application - {{ application.full_name }}</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 30px;
+        color: #222;
+    }
+    .toolbar { margin-bottom: 20px; }
+    .toolbar button {
+        padding: 8px 16px;
+        background: #2f56d9;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .letterhead { text-align: center; margin-bottom: 10px; }
+    .letterhead img { max-height: 90px; }
+    h2 { text-align: center; margin: 6px 0 0; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #222;
+        padding-bottom: 14px;
+        margin-bottom: 14px;
+    }
+    .photo-box img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 1px solid #999;
+    }
+    table.bio { width: 100%; border-collapse: collapse; }
+    table.bio td {
+        padding: 8px 6px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: top;
+    }
+    table.bio td.label { width: 260px; font-weight: bold; color: #333; }
+    .declaration {
+        margin-top: 30px;
+        border-top: 1px solid #999;
+        padding-top: 16px;
+    }
+    .sign-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+    }
+    .sign-box { width: 45%; border-top: 1px solid #333; padding-top: 4px; text-align: center; }
+    @media print {
+        .toolbar { display: none; }
+        body { margin: 0; }
+    }
+</style>
+</head>
+<body>
+    <div class="toolbar">
+        <button onclick="window.print()">Print / Save as PDF</button>
+    </div>
+
+    {% if school_config and school_config.header_image %}
+    <div class="letterhead"><img src="{{ school_config.header_image.url }}" alt="School Header"></div>
+    {% endif %}
+    <h2>Student Admission Application Form</h2>
+    <div class="subtitle">Application No: {{ application.application_number|default:"Not Yet Assigned" }}</div>
+
+    <div class="header-row">
+        <table class="bio" style="width:70%;">
+            <tr><td class="label">Full Name</td><td>{{ application.full_name }}</td></tr>
+            <tr><td class="label">Class Applying For</td><td>{{ application.class_applying_for|default:"—" }}</td></tr>
+            <tr><td class="label">Academic Session</td><td>{{ application.session|default:"—" }}</td></tr>
+        </table>
+        <div class="photo-box">
+            {% if application.passport_photograph %}
+            <img src="{{ application.passport_photograph.url }}" alt="Passport Photograph">
+            {% endif %}
+        </div>
+    </div>
+
+    <table class="bio">
+        <tr><td class="label">Phone Number</td><td>{{ application.phone_number }}</td></tr>
+        <tr><td class="label">Date of Birth</td><td>{{ application.date_of_birth|date:"d M Y" }}</td></tr>
+        <tr><td class="label">Sex</td><td>{{ application.sex }}</td></tr>
+        <tr><td class="label">Contact Address</td><td>{{ application.contact_address }}</td></tr>
+        <tr><td class="label">Religion</td><td>{{ application.religion }}</td></tr>
+        <tr><td class="label">Nationality</td><td>{{ application.nationality }}</td></tr>
+        <tr><td class="label">State of Origin</td><td>{{ application.state_of_origin }}</td></tr>
+        <tr><td class="label">L.G.A.</td><td>{{ application.lga }}</td></tr>
+        <tr><td class="label">Parent's/Guardian's Phone Number</td><td>{{ application.guardian_phone_number }}</td></tr>
+        <tr><td class="label">Parent's/Guardian's Occupation</td><td>{{ application.guardian_occupation }}</td></tr>
+        <tr><td class="label">Health Status</td><td>{{ application.health_status|default:"—" }}</td></tr>
+        <tr><td class="label">Qualifications Obtained</td><td>{{ application.qualifications_obtained|default:"—" }}</td></tr>
+    </table>
+
+    <div class="declaration">
+        <p>
+            <strong>Declaration:</strong> I hereby declare that the information provided above is true and correct
+            to the best of my knowledge.
+        </p>
+        <div class="sign-row">
+            <div class="sign-box">{{ application.declaration_full_name }}<br><small>Signature / Name of Applicant/Parent/Guardian</small></div>
+            <div class="sign-box">{{ application.declaration_date|date:"d M Y" }}<br><small>Date</small></div>
+        </div>
+    </div>
+</body>
+</html>

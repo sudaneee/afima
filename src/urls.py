@@ -189,6 +189,20 @@ urlpatterns = [
 
     path('results/download/<int:student_id>/<int:session_id>/<int:term_id>/<int:class_id>/',
          views.download_single_result_pdf, name='download_single_result_pdf'),
+
+    # Online Admission - Tokens
+    path('admission/tokens/', views.admission_token_list, name='admission_token_list'),
+    path('admission/tokens/generate/', views.generate_admission_tokens, name='generate_admission_tokens'),
+    path('admission/tokens/batch/<int:batch_id>/print/', views.print_admission_tokens, name='print_admission_tokens'),
+    path('admission/tokens/batch/<int:batch_id>/export/', views.export_admission_tokens_csv, name='export_admission_tokens_csv'),
+    path('admission/tokens/<int:token_id>/deactivate/', views.deactivate_admission_token, name='deactivate_admission_token'),
+    path('admission/tokens/<int:token_id>/reactivate/', views.reactivate_admission_token, name='reactivate_admission_token'),
+
+    # Online Admission - Applications
+    path('admission/applications/', views.application_list, name='application_list'),
+    path('admission/applications/<int:pk>/', views.application_detail, name='application_detail'),
+    path('admission/applications/<int:pk>/convert/', views.convert_application_to_student, name='convert_application_to_student'),
+    path('admission/applications/<int:pk>/print/', views.print_application, name='print_application'),
 ]
 
 

@@ -11,6 +11,23 @@ admin.site.register(MidTermResult)
 admin.site.register(PartPaymentApproval)
 admin.site.register(OtherFeeStructure)
 
+@admin.register(TokenBatch)
+class TokenBatchAdmin(admin.ModelAdmin):
+    list_display = ('id', 'label', 'quantity', 'generated_by', 'created_at')
+    search_fields = ('label',)
+
+@admin.register(AdmissionToken)
+class AdmissionTokenAdmin(admin.ModelAdmin):
+    list_display = ('token_code', 'batch', 'is_used', 'is_active', 'used_at', 'created_at')
+    search_fields = ('token_code',)
+    list_filter = ('is_used', 'is_active', 'batch')
+
+@admin.register(AdmissionApplication)
+class AdmissionApplicationAdmin(admin.ModelAdmin):
+    list_display = ('application_number', 'full_name', 'phone_number', 'class_applying_for', 'session', 'status', 'submitted_at')
+    search_fields = ('application_number', 'full_name', 'phone_number', 'guardian_phone_number')
+    list_filter = ('status', 'class_applying_for', 'session')
+
 @admin.register(Guardian)
 class GuardianAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'phone_number', 'email', 'relationship')

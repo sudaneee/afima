@@ -1,0 +1,262 @@
+{% extends 'website/base.html' %}
+{% load static %}
+{% block content %}
+<div class="page-wrapper">
+
+    <!-- Main Header-->
+    {% include 'website/header.html' %}
+
+    <!--Page Title-->
+    <section class="page-title" style="background-image:url('{{about_header_bg.image.url}}');">
+        <div class="auto-container">
+            <h2>Admission Application Form</h2>
+        </div>
+    </section>
+
+    <!--Breadcrumb-->
+    <div class="breadcrumb-outer">
+        <div class="auto-container">
+            <ul class="bread-crumb text-center">
+                <li><a href="{% url 'home' %}">Home</a> <span class="fa fa-angle-right"></span></li>
+                <li>Admission Application</li>
+            </ul>
+        </div>
+    </div>
+    <!--End Page Title-->
+
+    <style>
+        .apply-section { padding: 60px 0; }
+        .apply-card {
+            max-width: 880px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+        .apply-card h3 { margin-bottom: 4px; }
+        .apply-card .token-badge {
+            display: inline-block;
+            background: #eef1ff;
+            color: #14206b;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        .apply-card .section-heading {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 30px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eee;
+            color: #14206b;
+        }
+        .apply-card .section-heading:first-of-type { margin-top: 0; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 18px; }
+        .form-group-half { flex: 1 1 45%; min-width: 240px; }
+        .form-group-full { flex: 1 1 100%; }
+        .apply-card label { font-weight: 600; margin-bottom: 6px; display: block; font-size: 14px; }
+        .apply-card input[type="text"],
+        .apply-card input[type="tel"],
+        .apply-card input[type="date"],
+        .apply-card select,
+        .apply-card textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .apply-card textarea { resize: vertical; min-height: 70px; }
+        .apply-card input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+        }
+        .apply-card .declaration-box {
+            background: #f9fafc;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .apply-card .declaration-box label.checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-weight: 400;
+            font-size: 14px;
+        }
+        .apply-card button.submit-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            background: #14206b;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+        }
+        .apply-card .messages { margin-bottom: 20px; }
+        .apply-card .alert-error { background: #fdecea; color: #b3261e; border: 1px solid #f5c6c3; padding: 12px 16px; border-radius: 6px; margin-bottom: 8px; }
+        .required-star { color: #d33; }
+    </style>
+
+    <section class="apply-section">
+        <div class="auto-container">
+            <div class="apply-card">
+                <h3>Student Admission Application</h3>
+                <span class="token-badge">Token: {{ token.token_code }}</span>
+
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert-error">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="section-heading">Applicant Biodata</div>
+                    <div class="form-row">
+                        <div class="form-group-half">
+                            <label>Full Name <span class="required-star">*</span></label>
+                            <input type="text" name="full_name" value="{{ form_data.full_name|default:'' }}" required>
+                        </div>
+                        <div class="form-group-half">
+                            <label>Phone Number <span class="required-star">*</span></label>
+                            <input type="tel" name="phone_number" value="{{ form_data.phone_number|default:'' }}" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-half">
+                            <label>Date of Birth <span class="required-star">*</span></label>
+                            <input type="date" name="date_of_birth" value="{{ form_data.date_of_birth|default:'' }}" required>
+                        </div>
+                        <div class="form-group-half">
+                            <label>Sex <span class="required-star">*</span></label>
+                            <select name="sex" required>
+                                <option value="">Select Sex</option>
+                                <option value="Male" {% if form_data.sex == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if form_data.sex == 'Female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-full">
+                            <label>Contact Address <span class="required-star">*</span></label>
+                            <textarea name="contact_address" required>{{ form_data.contact_address|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-half">
+                            <label>Religion <span class="required-star">*</span></label>
+                            <input type="text" name="religion" value="{{ form_data.religion|default:'' }}" required>
+                        </div>
+                        <div class="form-group-half">
+                            <label>Nationality <span class="required-star">*</span></label>
+                            <input type="text" name="nationality" value="{{ form_data.nationality|default:'Nigerian' }}" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-half">
+                            <label>State of Origin <span class="required-star">*</span></label>
+                            <input type="text" name="state_of_origin" value="{{ form_data.state_of_origin|default:'' }}" required>
+                        </div>
+                        <div class="form-group-half">
+                            <label>L.G.A. (Local Government Area) <span class="required-star">*</span></label>
+                            <input type="text" name="lga" value="{{ form_data.lga|default:'' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="section-heading">Parent / Guardian Information</div>
+                    <div class="form-row">
+                        <div class="form-group-half">
+                            <label>Parent's/Guardian's Phone Number <span class="required-star">*</span></label>
+                            <input type="tel" name="guardian_phone_number" value="{{ form_data.guardian_phone_number|default:'' }}" required>
+                        </div>
+                        <div class="form-group-half">
+                            <label>Parent's/Guardian's Occupation <span class="required-star">*</span></label>
+                            <input type="text" name="guardian_occupation" value="{{ form_data.guardian_occupation|default:'' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="section-heading">Health &amp; Academic Background</div>
+                    <div class="form-row">
+                        <div class="form-group-full">
+                            <label>Health Status</label>
+                            <textarea name="health_status" placeholder="e.g. Good, or state any known allergy/medical condition">{{ form_data.health_status|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-full">
+                            <label>Qualifications Obtained</label>
+                            <textarea name="qualifications_obtained" placeholder="Previous school(s) attended / certificates obtained">{{ form_data.qualifications_obtained|default:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-heading">Admission Details</div>
+                    <div class="form-row">
+                        <div class="form-group-half">
+                            <label>Class/Level Applying For <span class="required-star">*</span></label>
+                            <select name="class_applying_for" required>
+                                <option value="">Select Class</option>
+                                {% for c in school_classes %}
+                                <option value="{{ c.id }}" {% if form_data.class_applying_for == c.id|stringformat:"s" %}selected{% endif %}>{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group-half">
+                            <label>Academic Session <span class="required-star">*</span></label>
+                            <select name="session" required>
+                                <option value="">Select Session</option>
+                                {% for s in sessions %}
+                                <option value="{{ s.id }}" {% if form_data.session == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-heading">Passport Photograph</div>
+                    <div class="form-row">
+                        <div class="form-group-full">
+                            <label>Attach Passport Photograph <span class="required-star">*</span></label>
+                            <input type="file" name="passport_photograph" accept="image/*" required>
+                        </div>
+                    </div>
+
+                    <div class="section-heading">Declaration</div>
+                    <div class="declaration-box">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="declaration_agreed" {% if form_data.declaration_agreed %}checked{% endif %}>
+                            I declare that the information provided in this application is true and correct
+                            to the best of my knowledge.
+                        </label>
+                        <div class="form-row" style="margin-top:16px;">
+                            <div class="form-group-half">
+                                <label>Signature (Type Full Name) <span class="required-star">*</span></label>
+                                <input type="text" name="declaration_full_name" value="{{ form_data.declaration_full_name|default:'' }}" required>
+                            </div>
+                            <div class="form-group-half">
+                                <label>Date <span class="required-star">*</span></label>
+                                <input type="date" name="declaration_date" value="{% if form_data.declaration_date %}{{ form_data.declaration_date }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    {% include 'website/footer.html' %}
+</div>
+{% endblock content %}
